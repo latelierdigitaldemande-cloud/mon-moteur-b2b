@@ -1,0 +1,14 @@
+[project]
+name = "mon-moteur-b2b"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "apify-client",
+    "pandas",
+    "requests"
+]
+
+[tool.vercel]
+# On dit à Vercel de laisser index.html tranquille à la racine
+# et de n'activer le Python QUE sur le dossier api/
+functions = { "api/*.py" = { "maxDuration" = 60 } }
