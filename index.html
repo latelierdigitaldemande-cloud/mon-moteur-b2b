@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Moteur de Recherche B2B</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f5f5f7; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { max-width: 600px; width: 100%; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); box-sizing: border-box; }
+        h1 { text-align: center; color: #1d1d1f; font-size: 24px; margin-bottom: 20px; }
+        input[type="text"] { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #d2d2d7; border-radius: 10px; font-size: 16px; box-sizing: border-box; outline: none; }
+        input[type="text"]:focus { border-color: #0071e3; }
+        button { width: 100%; padding: 14px; background-color: #0071e3; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        button:hover { background-color: #0077ed; }
+        #loading { display: none; text-align: center; color: #86868b; margin-top: 15px; font-weight: 500; }
+        .table-container { width: 100%; max-width: 900px; margin-top: 30px; overflow-x: auto; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+        th { background-color: #f5f5f7; padding: 12px; color: #1d1d1f; font-weight: 600; border-bottom: 1px solid #d2d2d7; }
+        td { padding: 12px; border-bottom: 1px solid #e5e5ea; color: #333; }
+        tr:last-child td { border-bottom: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🔍 Recherche Portables B2B</h1>
+        <input type="text" id="query" placeholder="Ex: electricien toulouse, plombier lyon...">
+        <button onclick="lancerRecherche()">⚡ Rechercher les décideurs</button>
+        <div id="loading">🤖 Le robot cherche sur Google Maps et l'API Gouv... Patientez (environ 1-2 min)...</div>
+    </div>
+
+    <div class="table-container" id="resultContainer" style="display: none;">
+        <table id="resultTable">
+            <thead>
+                <tr>
+                    <th>Entreprise</th>
+                    <th>Portable</th>
+                    <th>Site Web</th>
+                    <th>Adresse</th>
+                    <th>Nom du Patron</th>
+                </tr>
+            </thead>
+            <tbody id="resultBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        async function lancerRecherche() {
+            const query = document.getElementById('query').value;
+            const loading = document.getElementById('loading');
+            const resultContainer = document.getElementById('resultContainer');
+            const resultBody = document.getElementById('resultBody');
+            
+            if(!query) return alert("Écris d'abord une recherche !");
+            
+            loading.style.display = "block";
+            resultContainer.style.display = "none";
+            resultBody.innerHTML = "";
+            
+            try {
+                // On appelle l'API Python cachée sur Vercel
+                const response = await fetch(`/api/chercher?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                
+                loading.style.display = "none";
+                
+                if (data.error || data.length === 0) {
+                    alert("Aucun portable trouvé ou erreur avec le robot.");
+                    return;
+                }
+                
+                data.forEach(item => {
+                    const row = `<tr>
+                        <td><b>${item.title || ''}</b></td>
+                        <td><a href="https://wa.me/${item.phone?.replace(/[^0-9]/g, '')}" target="_blank" style="color: #0071e3; text-decoration: none;">📱 ${item.phone || ''}</a></td>
+                        <td>${item.website ? `<a href="${item.website}" target="_blank">Lien</a>` : '-'}</td>
+                        <td>${item.address || ''}</td>
+                        <td><mark style="background-color: #c7ecff; padding: 2px 6px; border-radius: 4px; font-weight: bold;">👑 ${item.NOM_DU_PATRON || 'Inconnu'}</mark></td>
+                    </tr>`;
+                    resultBody.innerHTML += row;
+                });
+                
+                resultContainer.style.display = "block";
+            } catch (err) {
+                loading.style.display = "none";
+                alert("Erreur de connexion avec le serveur Vercel.");
+            }
+        }
+    </script>
+</body>
+</html>
