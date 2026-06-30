@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/api/chercher", "destination": "/api/chercher.py" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
