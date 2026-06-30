@@ -1,0 +1,10 @@
+{
+  "builds": [
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "api/chercher.py", "use": "@vercel/python" }
+  ],
+  "routes": [
+    { "src": "/api/chercher", "dest": "api/chercher.py" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}
