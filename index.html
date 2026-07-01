@@ -58,8 +58,13 @@
             resultBody.innerHTML = "";
             
             try {
-                // On appelle l'API Python cachée sur Vercel
-                const response = await fetch(`/api/chercher?q=${encodeURIComponent(query)}`);
+                // Fetch configuré pour détruire le cache de Vercel avec un timestamp unique (&_=)
+                const response = await fetch(`/api/chercher?q=${encodeURIComponent(query)}&_=${Date.now()}`, {
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
                 const data = await response.json();
                 
                 loading.style.display = "none";
